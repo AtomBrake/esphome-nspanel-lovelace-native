@@ -1954,7 +1954,7 @@ void NSPanelLovelace::process_button_press_(
       ha_action_type::shuffle_set,
       {{
         {to_string(ha_attr_type::entity_id), entity_id},
-        {to_string(ha_attr_type::shuffle), shuffle}
+        {to_string(ha_attr_type::shuffle), std::string(shuffle)}
       }});
   } else if (button_type == button_type::volumeSlider) {
     auto volume = esphome::str_snprintf("%.2f", 7, std::stoi(value) * 0.01f);

@@ -755,7 +755,12 @@ inline const Value &get_value_or_default(
   // todo: fix this bad implementation
   //       use pointers and unwrap Value?
   static Value ret{};
-  if (try_get_value(map, ret, key.c_str(), fallback_key))
+  const char *key_cstr;
+  if constexpr (std::is_same_v<std::decay_t<KeyT>, const char*>)
+    key_cstr = key;
+  else
+    key_cstr = key.c_str();
+  if (try_get_value(map, ret, key_cstr, fallback_key))
     return ret;
   return default_value;
 }
