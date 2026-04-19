@@ -514,14 +514,14 @@ void PowerCard::accept(PageVisitor& visitor) { visitor.visit(*this); }
 
 void PowerCard::on_entity_state_change(const std::string &state) {
   this->update_home_value_();
-  this->set_render_invalid();
+  this->set_items_render_invalid();
 }
 
 void PowerCard::on_entity_attribute_change(ha_attr_type attr, const psram_string &value) {
   if (attr == ha_attr_type::unit_of_measurement) {
     this->home_ha_unit_ = std::string(value);
     this->update_home_value_();
-    this->set_render_invalid();
+    this->set_items_render_invalid();
   }
 }
 
@@ -532,7 +532,9 @@ void PowerCard::update_home_value_() {
     return;
   }
   float val = 0.0f;
-  try { val = std::stof(state); } catch (...) {
+  char *end = nullptr;
+  val = std::strtof(state.c_str(), &end);
+  if (end == state.c_str() || *end != '\0') {
     this->home_value_str_ = state;
     return;
   }

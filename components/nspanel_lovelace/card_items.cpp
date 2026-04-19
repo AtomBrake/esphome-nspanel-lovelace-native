@@ -387,7 +387,9 @@ void PowerCardItem::state_power_fn(StatefulPageItem *me) {
   }
 
   float val = 0.0f;
-  try { val = std::stof(state); } catch (...) {
+  char *end = nullptr;
+  val = std::strtof(state.c_str(), &end);
+  if (end == state.c_str() || *end != '\0') {
     me_->value_str_ = state;
     me_->speed_ = 0;
     return;
