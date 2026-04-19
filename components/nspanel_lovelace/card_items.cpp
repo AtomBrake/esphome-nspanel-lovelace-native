@@ -55,11 +55,11 @@ EntitiesCardEntityItem::EntitiesCardEntityItem(
 void EntitiesCardEntityItem::accept(PageItemVisitor& visitor) { visitor.visit(*this); }
 
 void EntitiesCardEntityItem::on_entity_attribute_change(
-    ha_attr_type attr, const std::string &value) {
+    ha_attr_type attr, const psram_string &value) {
   StatefulPageItem::on_entity_attribute_change(attr, value);
 
   if (attr == ha_attr_type::unit_of_measurement) {
-    this->set_value_postfix(value);
+    this->set_value_postfix(std::string(value.c_str(), value.size()));
     return;
   }
 
@@ -161,10 +161,10 @@ void EntitiesCardEntityItem::state_cover_fn(StatefulPageItem *me) {
   me_->value_.clear();
 
   if (!position_str.empty()) {
-    position = std::stoi(position_str);
+    position = str_to_int(position_str);
   }
   if (!supported_features_str.empty()) {
-    supported_features = std::stoi(supported_features_str);
+    supported_features = str_to_int(supported_features_str);
   }
 
   // see: https://github.com/home-assistant/core/blob/dev/homeassistant/components/cover/__init__.py#L112
@@ -337,6 +337,105 @@ uint16_t EntitiesCardEntityItem::get_render_buffer_reserve_() const {
   // try to guess the required size of the buffer to reduce heap fragmentation
   return CardItem::get_render_buffer_reserve_() +
          this->value_.length() + this->value_postfix_.length() + 2;
+}
+
+/*
+ * =============== PowerCardItem ===============
+ */
+
+PowerCardItem::PowerCardItem(
+    const std::string &uuid, std::shared_ptr<Entity> entity) :
+    CardItem(uuid, std::move(entity)) {
+  this->icon_default_value_ = icon_t::flash;
+  this->icon_value_ = icon_t::flash;
+  this->on_entity_type_change(this->get_type());
+  this->render_buffer_.reserve(this->get_render_buffer_reserve_());
+}
+
+PowerCardItem::PowerCardItem(
+    const std::string &uuid, std::shared_ptr<Entity> entity,
+    const std::string &display_name) :
+    CardItem(uuid, std::move(entity), display_name) {
+  this->icon_default_value_ = icon_t::flash;
+  this->icon_value_ = icon_t::flash;
+  this->on_entity_type_change(this->get_type());
+  this->render_buffer_.reserve(this->get_render_buffer_reserve_());
+}
+
+void PowerCardItem::accept(PageItemVisitor& visitor) { visitor.visit(*this); }
+
+void PowerCardItem::on_entity_attribute_change(
+    ha_attr_type attr, const psram_string &value) {
+  StatefulPageItem::on_entity_attribute_change(attr, value);
+  if (attr == ha_attr_type::unit_of_measurement) {
+    this->ha_unit_ = std::string(value);
+    if (this->on_state_callback_) {
+      this->on_state_callback_(this);
+      this->set_render_invalid();
+    }
+  }
+}
+
+void PowerCardItem::state_power_fn(StatefulPageItem *me) {
+  auto me_ = static_cast<PowerCardItem*>(me);
+  const auto &state = me_->get_state();
+
+  if (state == entity_state::unknown || state == entity_state::unavailable) {
+    me_->value_str_ = "-";
+    me_->speed_ = 0;
+    return;
+  }
+
+  float val = 0.0f;
+  try { val = std::stof(state); } catch (...) {
+    me_->value_str_ = state;
+    me_->speed_ = 0;
+    return;
+  }
+
+  char buf[16];
+  if (me_->ha_unit_ == "W") {
+    float abs_val = val < 0.0f ? -val : val;
+    if (abs_val >= 1000.0f) {
+      snprintf(buf, sizeof(buf), "%.1f", val / 1000.0f);
+      me_->value_str_ = std::string(buf) + "kW";
+    } else {
+      snprintf(buf, sizeof(buf), "%.0f", val);
+      me_->value_str_ = std::string(buf) + "W";
+    }
+    int16_t speed = static_cast<int16_t>(val / 20.0f);
+    me_->speed_ = speed > 120 ? 120 : (speed < -120 ? -120 : speed);
+  } else if (me_->ha_unit_ == "kW") {
+    snprintf(buf, sizeof(buf), "%.2f", val);
+    me_->value_str_ = std::string(buf) + "kW";
+    int16_t speed = static_cast<int16_t>(val * 50.0f);
+    me_->speed_ = speed > 120 ? 120 : (speed < -120 ? -120 : speed);
+  } else {
+    me_->value_str_ = state;
+    if (!me_->ha_unit_.empty()) me_->value_str_ += me_->ha_unit_;
+    me_->speed_ = 0;
+  }
+}
+
+void PowerCardItem::set_on_state_callback_(const char *type) {
+  this->on_state_callback_ = PowerCardItem::state_power_fn;
+}
+
+std::string &PowerCardItem::render_(std::string &buffer) {
+  // format: text~entityId~icon~iconColor~displayName~valueStr~speed
+  buffer.assign(entity_render_type::text).append(1, SEPARATOR);
+  buffer.append(this->entity_->get_entity_id()).append(1, SEPARATOR);
+  buffer.append(CHAR8_CAST(this->icon_value_)).append(1, SEPARATOR);
+  buffer.append(this->get_icon_color_str()).append(1, SEPARATOR);
+  buffer.append(this->display_name_).append(1, SEPARATOR);
+  buffer.append(this->value_str_).append(1, SEPARATOR);
+  buffer.append(std::to_string(this->speed_));
+  return buffer;
+}
+
+uint16_t PowerCardItem::get_render_buffer_reserve_() const {
+  return CardItem::get_render_buffer_reserve_() +
+         this->value_str_.length() + 10;
 }
 
 } // namespace nspanel_lovelace

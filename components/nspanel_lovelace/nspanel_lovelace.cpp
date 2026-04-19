@@ -1020,8 +1020,8 @@ void NSPanelLovelace::render_light_detail_update_(StatefulPageItem *item) {
       contains_value(supported_modes, ha_attr_color_mode::rgbw) ||
       contains_value(supported_modes, ha_attr_color_mode::rgbww));
 
-  std::string color_mode = entity->get_attribute(ha_attr_type::color_mode);
-  std::string color_temp = generic_type::disable;
+  auto color_mode = entity->get_attribute(ha_attr_type::color_mode);
+  psram_string color_temp = generic_type::disable;
   if (contains_value(supported_modes, ha_attr_color_mode::color_temp)) {
     if (color_mode == ha_attr_color_mode::color_temp) {
       color_temp = entity->get_attribute(ha_attr_type::color_temp, generic_type::disable);
@@ -1069,7 +1069,7 @@ void NSPanelLovelace::render_timer_detail_update_(StatefulPageItem *item) {
 
   if (idle) {
     this->cancel_interval(entity_type::timer);
-    std::string time_remaining_str;
+    psram_string time_remaining_str;
     if (state == entity_state::paused) {
       time_remaining_str = item->get_attribute(ha_attr_type::remaining);
     } else {
@@ -1235,8 +1235,8 @@ void NSPanelLovelace::render_input_select_detail_update_(StatefulPageItem *item)
   if(item == nullptr) return;
 
   auto state = item->get_state();
-  std::string options;
-  if (item->is_type(entity_type::input_select) || 
+  psram_string options;
+  if (item->is_type(entity_type::input_select) ||
       item->is_type(entity_type::select)) {
     options = item->get_attribute(ha_attr_type::options);
   }
@@ -1245,7 +1245,7 @@ void NSPanelLovelace::render_input_select_detail_update_(StatefulPageItem *item)
   }
   else if (item->is_type(entity_type::media_player)) {
     options = item->get_attribute(ha_attr_type::source_list);
-    state = item->get_attribute(ha_attr_type::source);
+    state = item->get_attribute(ha_attr_type::source).c_str();
   }
   if (!options.empty()) replace_all(options, ',', '?');
 
@@ -1280,9 +1280,9 @@ void NSPanelLovelace::render_fan_detail_update_(StatefulPageItem *item) {
     if (speed.empty()) {
       speed = "0";
     } else {
-      speed_val = std::stof(speed);
+      speed_val = str_to_float(speed);
     }
-    auto step_val = std::stof(percentage_step);
+    auto step_val = str_to_float(percentage_step);
     if (step_val < 1.0f) step_val = 1.0f; // avoid divide-by-zero
     speed = esphome::to_string(
       static_cast<uint16_t>(round(speed_val / step_val)));
@@ -1813,10 +1813,10 @@ void NSPanelLovelace::process_button_press_(
     if (entity_type == entity_type::fan) {
       auto entity = this->get_entity_(entity_id);
       if (entity == nullptr) return;
-      auto step = std::stof(
+      auto step = str_to_float(
         entity->get_attribute(ha_attr_type::percentage_step, "0"));
       if (step > 100.0f) step = 100.0f;
-      auto val = std::stof(value) * step;
+      auto val = str_to_float(value) * step;
       if (val > 100.0f) val = 100.0f;
       auto pct = esphome::str_snprintf("%.6f", 11, val);
       
@@ -2010,8 +2010,8 @@ void NSPanelLovelace::process_button_press_(
     if (entity == nullptr) return;
     auto &minstr = entity->get_attribute(ha_attr_type::min_mireds);
     auto &maxstr = entity->get_attribute(ha_attr_type::max_mireds);
-    uint16_t min_mireds = minstr.empty() ? 153 : std::stoi(minstr);
-    uint16_t max_mireds = maxstr.empty() ? 500 : std::stoi(maxstr);
+    uint16_t min_mireds = minstr.empty() ? 153 : static_cast<uint16_t>(str_to_int(minstr));
+    uint16_t max_mireds = maxstr.empty() ? 500 : static_cast<uint16_t>(str_to_int(maxstr));
     if (min_mireds >= max_mireds) {
       ESP_LOGW(TAG, "min/max mired range invalid %i>=%i", min_mireds, max_mireds);
       min_mireds = 153;
@@ -2026,7 +2026,7 @@ void NSPanelLovelace::process_button_press_(
         // scale 0-100 from slider to color range of the light
         {to_string(ha_attr_type::color_temp), std::to_string(
           static_cast<int>(
-            scale_value(std::stoi(value), {0, 100},
+            scale_value(str_to_int(value), {0, 100},
             {static_cast<double>(min_mireds), static_cast<double>(max_mireds)})
           ))}
       }});

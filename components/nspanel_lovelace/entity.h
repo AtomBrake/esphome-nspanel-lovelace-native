@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 #include <string>
-#include <map>
+#include <array>
 #include <vector>
 
 #include "helpers.h"
@@ -16,7 +16,7 @@ public:
   virtual ~IEntitySubscriber() {}
   virtual void on_entity_type_change(const char *type) {}
   virtual void on_entity_state_change(const std::string &state) {}
-  virtual void on_entity_attribute_change(ha_attr_type attr, const std::string &value) {}
+  virtual void on_entity_attribute_change(ha_attr_type attr, const psram_string &value) {}
 };
 
 class Entity {
@@ -39,7 +39,7 @@ public:
   void set_state(const std::string &state);
 
   bool has_attribute(ha_attr_type attr) const;
-  const std::string &get_attribute(ha_attr_type attr, const std::string &default_value = "") const;
+  const psram_string &get_attribute(ha_attr_type attr, const psram_string &default_value = {}) const;
   void set_attribute(ha_attr_type attr, const std::string &value);
 
 protected:
@@ -47,13 +47,13 @@ protected:
   const char *type_;
   bool type_overridden_ = false;
   std::string state_;
-  std::map<ha_attr_type, std::string> attributes_;
+  std::array<psram_string, static_cast<size_t>(ha_attr_type::_count)> attributes_;
   std::vector<IEntitySubscriber*> targets_;
   bool enable_notifications_ = false;
 
   void notify_type_change(const char *type);
   void notify_state_change(const std::string &state);
-  void notify_attribute_change(ha_attr_type attr, const std::string &value);
+  void notify_attribute_change(ha_attr_type attr, const psram_string &value);
 };
 
 }
