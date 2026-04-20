@@ -96,11 +96,15 @@ Entities reporting `unknown` or `unavailable` show a `-` and a stopped animation
     - entity_id: sensor.solar_power
       name: Solar
       icon: solar-power
+      icon_color: 65504   # yellow (#FFFF00)
     - entity_id: sensor.ev_charger_power
       name: EV
       icon: ev-station
+      icon_color: 2016    # green (#00FF00)
     - entity_id: sensor.heat_pump_power
       name: Heat pump
+      icon: heat-pump
+      icon_color: 64512   # orange (#FF8000)
 ```
 
 PRs to expand the functionality or fix bugs are very welcome!
