@@ -39,7 +39,10 @@ public:
   void set_state(const std::string &state);
 
   bool has_attribute(ha_attr_type attr) const;
-  const psram_string &get_attribute(ha_attr_type attr, const psram_string &default_value = {}) const;
+  inline const psram_string &get_attribute(ha_attr_type attr, const psram_string &default_value = {}) const {
+    const auto &val = attributes_[static_cast<size_t>(attr)];
+    return val.empty() ? default_value : val;
+  }
   void set_attribute(ha_attr_type attr, const std::string &value);
 
 protected:

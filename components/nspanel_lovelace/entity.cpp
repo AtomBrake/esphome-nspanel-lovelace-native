@@ -99,11 +99,6 @@ bool Entity::has_attribute(ha_attr_type attr) const {
   return !attributes_[static_cast<size_t>(attr)].empty();
 }
 
-const psram_string &Entity::get_attribute(ha_attr_type attr, const psram_string &default_value) const {
-  const auto &val = attributes_[static_cast<size_t>(attr)];
-  return val.empty() ? default_value : val;
-}
-
 void Entity::set_attribute(ha_attr_type attr, const std::string &value) {
   auto &slot = attributes_[static_cast<size_t>(attr)];
   if (value.empty() || value == "None" || value == "none") {
