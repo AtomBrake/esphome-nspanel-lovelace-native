@@ -593,10 +593,13 @@ std::string &PowerCard::render(std::string &buffer) {
   for (auto& item : this->items_) {
     buffer.append(1, SEPARATOR).append(item->render());
   }
-  // Pad remaining outer slots with delete placeholders (6 fields + speed=0)
+  // Pad remaining outer slots with delete placeholders
+  // Format must match PowerCardItem::render_: text~entityId~icon~iconColor~displayName~valueStr~speed
+  // The TFT firmware hides a slot when entityId == "delete"
   for (size_t i = item_count; i < 6; i++) {
     buffer.append(1, SEPARATOR);
-    buffer.append(entity_type::delete_).append(5, SEPARATOR).append("0");
+    buffer.append(entity_render_type::text).append(1, SEPARATOR)
+          .append(entity_type::delete_).append(5, SEPARATOR).append("0");
   }
 
   return buffer;
