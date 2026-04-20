@@ -63,6 +63,14 @@ The power card is designed to display a home energy overview. A central home ent
 
 Each entry in `entities` supports the same options as other card types (`entity_id`, `name`, `icon`, `icon_color`).
 
+### Colours
+
+Icons automatically switch between two colours to indicate power flow state:
+- **Active** (power ≥ 1 W/0.001 kW): the configured `icon_color`, or HA blue (`17299`) by default
+- **Inactive** (zero, unavailable, or unknown): grey (`#808080`, `33808`)
+
+Set `icon_color` per entity to use Tesla-style colour coding, e.g. yellow for solar, green for EV, red for grid import. See [icon colour picker](https://chrishewett.com/blog/true-rgb565-colour-picker/) for rgb565 values.
+
 ### Units
 
 Both the home entity and the surrounding entities handle `W` and `kW` units automatically:

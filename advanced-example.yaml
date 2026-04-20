@@ -140,12 +140,15 @@ nspanel_lovelace:
         - entity_id: sensor.solar_power
           name: Solar
           icon: solar-power
+          icon_color: 65504   # yellow (#FFFF00) - active when generating
         - entity_id: sensor.ev_charger_power
           name: EV
           icon: ev-station
+          icon_color: 2016    # green (#00FF00) - active when charging
         - entity_id: sensor.heat_pump_power
           name: Heat pump
           icon: heat-pump
+          icon_color: 63488   # red (#FF0000) - active when running
 
 logger:
   baud_rate: 115200

@@ -529,6 +529,7 @@ void PowerCard::update_home_value_() {
   const auto &state = this->home_entity_->get_state();
   if (state == entity_state::unknown || state == entity_state::unavailable) {
     this->home_value_str_ = "-";
+    this->home_is_active_ = false;
     return;
   }
   float val = 0.0f;
@@ -536,11 +537,13 @@ void PowerCard::update_home_value_() {
   val = std::strtof(state.c_str(), &end);
   if (end == state.c_str() || *end != '\0') {
     this->home_value_str_ = state;
+    this->home_is_active_ = true;
     return;
   }
+  float abs_val = val < 0.0f ? -val : val;
+  this->home_is_active_ = (abs_val >= 1.0f);
   char buf[16];
   if (this->home_ha_unit_ == "W") {
-    float abs_val = val < 0.0f ? -val : val;
     if (abs_val >= 1000.0f) {
       snprintf(buf, sizeof(buf), "%.1f", val / 1000.0f);
       this->home_value_str_ = std::string(buf) + "kW";
@@ -568,12 +571,14 @@ std::string &PowerCard::render(std::string &buffer) {
 
   const auto &home_id = this->home_entity_->get_entity_id();
 
+  uint16_t home_display_color = this->home_is_active_ ? this->home_color_ : COLOR_INACTIVE;
+
   // Center item 1: home icon
   buffer.append(1, SEPARATOR);
   buffer.append(entity_render_type::text).append(1, SEPARATOR);
   buffer.append(home_id).append(1, SEPARATOR);
   buffer.append(CHAR8_CAST(this->home_icon_)).append(1, SEPARATOR);
-  buffer.append(std::to_string(this->home_color_)).append(1, SEPARATOR);
+  buffer.append(std::to_string(home_display_color)).append(1, SEPARATOR);
   buffer.append(this->get_title().empty() ? "Home" : this->get_title()).append(1, SEPARATOR);
   buffer.append(this->home_value_str_).append(1, SEPARATOR);
   buffer.append("0");
@@ -583,7 +588,7 @@ std::string &PowerCard::render(std::string &buffer) {
   buffer.append(entity_render_type::text).append(1, SEPARATOR);
   buffer.append(home_id).append(1, SEPARATOR);
   buffer.append(CHAR8_CAST(this->home_icon_)).append(1, SEPARATOR);
-  buffer.append(std::to_string(this->home_color_)).append(1, SEPARATOR);
+  buffer.append(std::to_string(home_display_color)).append(1, SEPARATOR);
   buffer.append(1, SEPARATOR);  // empty display name
   buffer.append(this->home_value_str_).append(1, SEPARATOR);
   buffer.append("0");

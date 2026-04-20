@@ -184,12 +184,16 @@ public:
 
   std::string &render(std::string &buffer) override;
 
+  // rgb565 grey shown when home entity is unavailable/zero
+  static constexpr uint16_t COLOR_INACTIVE = 33808u; // #808080
+
 protected:
   std::shared_ptr<Entity> home_entity_;
   std::string home_value_str_;
   std::string home_ha_unit_;
   const icon_char_t *home_icon_ = icon_t::home;
   uint16_t home_color_ = 17299u;
+  bool home_is_active_ = false;
 
   void update_home_value_();
 };

@@ -383,6 +383,7 @@ void PowerCardItem::state_power_fn(StatefulPageItem *me) {
   if (state == entity_state::unknown || state == entity_state::unavailable) {
     me_->value_str_ = "-";
     me_->speed_ = 0;
+    me_->is_active_ = false;
     return;
   }
 
@@ -392,12 +393,15 @@ void PowerCardItem::state_power_fn(StatefulPageItem *me) {
   if (end == state.c_str() || *end != '\0') {
     me_->value_str_ = state;
     me_->speed_ = 0;
+    me_->is_active_ = false;
     return;
   }
 
+  float abs_val = val < 0.0f ? -val : val;
+  me_->is_active_ = (abs_val >= 1.0f);
+
   char buf[16];
   if (me_->ha_unit_ == "W") {
-    float abs_val = val < 0.0f ? -val : val;
     if (abs_val >= 1000.0f) {
       snprintf(buf, sizeof(buf), "%.1f", val / 1000.0f);
       me_->value_str_ = std::string(buf) + "kW";
@@ -416,6 +420,7 @@ void PowerCardItem::state_power_fn(StatefulPageItem *me) {
     me_->value_str_ = state;
     if (!me_->ha_unit_.empty()) me_->value_str_ += me_->ha_unit_;
     me_->speed_ = 0;
+    me_->is_active_ = (abs_val >= 1.0f);
   }
 }
 
@@ -428,7 +433,9 @@ std::string &PowerCardItem::render_(std::string &buffer) {
   buffer.assign(entity_render_type::text).append(1, SEPARATOR);
   buffer.append(this->entity_->get_entity_id()).append(1, SEPARATOR);
   buffer.append(CHAR8_CAST(this->icon_value_)).append(1, SEPARATOR);
-  buffer.append(this->get_icon_color_str()).append(1, SEPARATOR);
+  // Grey out the icon when inactive (power == 0 or unavailable), Tesla-card style
+  uint16_t color = this->is_active_ ? this->icon_color_ : COLOR_INACTIVE;
+  buffer.append(std::to_string(color)).append(1, SEPARATOR);
   buffer.append(this->display_name_).append(1, SEPARATOR);
   buffer.append(this->value_str_).append(1, SEPARATOR);
   buffer.append(std::to_string(this->speed_));
