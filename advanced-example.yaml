@@ -132,6 +132,21 @@ nspanel_lovelace:
       thermo_entity_id: climate.ecobee
       # temperature_unit: fahrenheit
 
+    - type: cardPower
+      sleep_timeout: 60
+      title: Energy
+      home_entity_id: sensor.home_power
+      entities:
+        - entity_id: sensor.solar_power
+          name: Solar
+          icon: solar-power
+        - entity_id: sensor.ev_charger_power
+          name: EV
+          icon: ev-station
+        - entity_id: sensor.heat_pump_power
+          name: Heat pump
+          icon: heat-pump
+
 logger:
   baud_rate: 115200
 
