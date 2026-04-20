@@ -105,6 +105,10 @@ int NSPanelLovelace::upload_by_chunks_(HTTPClient *http, const std::string &url,
     }
 
     this->recv_ret_string_(recv_string, 5000, true);
+    if (recv_string.empty()) {
+      ESP_LOGW(TAG, "No response from display during upload");
+      return -1;
+    }
     if (recv_string[0] != 0x05) { // 0x05 == "ok"
       ESP_LOGD(TAG, "recv_string [%s]",
                format_hex_pretty(reinterpret_cast<const uint8_t *>(recv_string.data()), recv_string.size()).c_str());
