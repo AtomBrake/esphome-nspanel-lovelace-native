@@ -66,10 +66,10 @@ Each entry in `entities` supports the same options as other card types (`entity_
 ### Colours
 
 Icons automatically switch between two colours to indicate power flow state:
-- **Active** (power ≥ 1 W/0.001 kW): the configured `icon_color`, or HA blue (`17299`) by default
+- **Active** (power ≥ 1 W/0.001 kW): the configured `icon: color`, or HA blue (`17299`) by default
 - **Inactive** (zero, unavailable, or unknown): grey (`#808080`, `33808`)
 
-Set `icon_color` per entity to use Tesla-style colour coding, e.g. yellow for solar, green for EV, red for grid import. See [icon colour picker](https://chrishewett.com/blog/true-rgb565-colour-picker/) for rgb565 values.
+Set `icon: color` per entity for Tesla-style colour coding, e.g. yellow for solar, green for EV, red for grid import. See [icon colour picker](https://chrishewett.com/blog/true-rgb565-colour-picker/) for rgb565 values.
 
 ### Units
 
@@ -95,16 +95,19 @@ Entities reporting `unknown` or `unavailable` show a `-` and a stopped animation
   entities:
     - entity_id: sensor.solar_power
       name: Solar
-      icon: solar-power
-      icon_color: 65504   # yellow (#FFFF00)
+      icon:
+        value: solar-power
+        color: 65504    # yellow (#FFFF00)
     - entity_id: sensor.ev_charger_power
       name: EV
-      icon: ev-station
-      icon_color: 2016    # green (#00FF00)
+      icon:
+        value: ev-station
+        color: 2016     # green (#00FF00)
     - entity_id: sensor.heat_pump_power
       name: Heat pump
-      icon: heat-pump
-      icon_color: 64512   # orange (#FF8000)
+      icon:
+        value: heat-pump
+        color: 64512    # orange (#FF8000)
 ```
 
 PRs to expand the functionality or fix bugs are very welcome!
