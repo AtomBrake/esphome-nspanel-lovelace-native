@@ -633,7 +633,7 @@ async def to_code(config):
     if is_test_mode:
         _LOGGER.info(f"[nspanel_lovelace] TEST DEVICE MODE ACTIVE, PSRAM DISABLED")
     # NSPanel has non-standard PSRAM pins which are not modifiable when building for Arduino
-    elif core.CORE.using_esp_idf:
+    elif esp32.is_idf():
         cg.add_define("USE_PSRAM")
         esp32.add_idf_sdkconfig_option(
             f"CONFIG_{esp32.get_esp32_variant().upper()}_SPIRAM_SUPPORT", True
@@ -683,10 +683,10 @@ async def to_code(config):
         # cg.add_define("USE_NSPANEL_TFT_UPLOAD")
         # core.CORE.add_define("USE_NSPANEL_TFT_UPLOAD")
         cg.add_build_flag("-DUSE_NSPANEL_TFT_UPLOAD")
-        if core.CORE.using_arduino:
+        if esp32.is_arduino():
             cg.add_library("WiFiClientSecure", None)
             cg.add_library("HTTPClient", None)
-        elif core.CORE.using_esp_idf:
+        elif esp32.is_idf():
             ## todo: Remove this condition by esphome version 2026.6.x
             if hasattr(esp32, "include_builtin_idf_component"):
                 esp32.include_builtin_idf_component("esp_http_client")
