@@ -386,7 +386,7 @@ def get_card_entities_length_limits(card_type: str, model: str = 'eu') -> list[i
 
 def validate_config(config):
     global card_ids
-    if not core.CORE.using_esp_idf:
+    if core.CORE.using_arduino:
         raise cv.Invalid(
             "nspanel_lovelace requires the ESP-IDF framework (framework: type: esp-idf). "
             "Arduino is not supported since the NSPanel's PSRAM is on non-standard pins "
