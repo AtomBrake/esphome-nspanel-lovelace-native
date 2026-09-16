@@ -510,7 +510,7 @@ CONFIG_SCHEMA = cv.All(
     .extend(cv.COMPONENT_SCHEMA),
     cv.only_on_esp32,
     cv.require_esphome_version(2026,4,0),
-    #cv.only_with_esp_idf,
+    cv.only_with_esp_idf,
     validate_config
 )
 
@@ -685,6 +685,7 @@ async def to_code(config):
         # cg.add_define("USE_NSPANEL_TFT_UPLOAD")
         # core.CORE.add_define("USE_NSPANEL_TFT_UPLOAD")
         cg.add_build_flag("-DUSE_NSPANEL_TFT_UPLOAD")
+
         ## todo: Remove this condition by esphome version 2026.6.x
         if hasattr(esp32, "include_builtin_idf_component"):
             esp32.include_builtin_idf_component("esp_http_client")
