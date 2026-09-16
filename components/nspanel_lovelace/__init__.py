@@ -386,6 +386,12 @@ def get_card_entities_length_limits(card_type: str, model: str = 'eu') -> list[i
 
 def validate_config(config):
     global card_ids
+    if not core.CORE.using_esp_idf:
+        raise cv.Invalid(
+            "nspanel_lovelace requires the ESP-IDF framework (framework: type: esp-idf). "
+            "Arduino is not supported since the NSPanel's PSRAM is on non-standard pins "
+            "that can't be configured under Arduino."
+        )
     model = config[CONF_MODEL]
     if CONF_LANGUAGE not in config[CONF_LOCALE]:
         raise cv.Invalid("A language must be specified in locale")
@@ -510,7 +516,6 @@ CONFIG_SCHEMA = cv.All(
     .extend(cv.COMPONENT_SCHEMA),
     cv.only_on_esp32,
     cv.require_esphome_version(2026,4,0),
-    cv.only_with_esp_idf,
     validate_config
 )
 
