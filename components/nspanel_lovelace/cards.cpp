@@ -198,7 +198,7 @@ std::string &AlarmCard::render(std::string &buffer) {
       generic_type::enable : generic_type::disable);
   
   // todo: not finished/tested
-  auto &open_sensors = this->alarm_entity_->get_attribute(ha_attr_type::open_sensors);
+  auto open_sensors = this->alarm_entity_->get_attribute(ha_attr_type::open_sensors);
   if (!open_sensors.empty()) {
     buffer.append(1, SEPARATOR).append(this->info_icon_->render());
   }
@@ -318,7 +318,7 @@ std::string &ThermoCard::render(std::string &buffer) {
       ha_attr_type::target_temp_step, "0.5")) * 10)));
   
   //TODO: add overwrite_supported_modes
-  auto& hvac_modes_str = 
+  auto hvac_modes_str =
     this->thermo_entity_->get_attribute(ha_attr_type::hvac_modes);
   if (hvac_modes_str.empty()) {
     buffer.append(4 * 8, SEPARATOR);

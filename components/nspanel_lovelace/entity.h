@@ -39,7 +39,22 @@ public:
   void set_state(const std::string &state);
 
   bool has_attribute(ha_attr_type attr) const;
-  inline const psram_string &get_attribute(ha_attr_type attr, const psram_string &default_value = {}) const {
+
+  // Zero-copy: falls back to a static empty string rather than a per-call temporary, so the
+  // returned reference is always either the entity's own attribute storage or a value with
+  // static storage duration — safe to bind by reference.
+  inline const psram_string &get_attribute(ha_attr_type attr) const {
+    static const psram_string empty_value{};
+    const auto &val = attributes_[static_cast<size_t>(attr)];
+    return val.empty() ? empty_value : val;
+  }
+
+  // Returns by value: this overload cannot return `const psram_string &` safely, since the
+  // unset branch would return a reference to a temporary bound to `default_value`, whose
+  // lifetime does not extend past this call's full-expression even though a reference to it is
+  // returned (see [class.temporary]: a temporary bound to a reference parameter persists only
+  // until the end of the full-expression containing the call).
+  inline psram_string get_attribute(ha_attr_type attr, const psram_string &default_value) const {
     const auto &val = attributes_[static_cast<size_t>(attr)];
     return val.empty() ? default_value : val;
   }
@@ -47,7 +62,7 @@ public:
 
 protected:
   std::string entity_id_;
-  const char *type_;
+  const char *type_ = nullptr;
   bool type_overridden_ = false;
   std::string state_;
   std::array<psram_string, static_cast<size_t>(ha_attr_type::_count)> attributes_;

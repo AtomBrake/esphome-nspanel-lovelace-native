@@ -112,8 +112,8 @@ void Entity::set_attribute(ha_attr_type attr, const std::string &value) {
     slot.assign(std::to_string(static_cast<int>(round(
         scale_value(strtol(value.c_str(), nullptr, 10), {0, 255}, {0, 100})))));
   } else if (attr == ha_attr_type::color_temp) {
-    auto &minstr = this->get_attribute(ha_attr_type::min_mireds);
-    auto &maxstr = this->get_attribute(ha_attr_type::max_mireds);
+    auto minstr = this->get_attribute(ha_attr_type::min_mireds);
+    auto maxstr = this->get_attribute(ha_attr_type::max_mireds);
     uint16_t min_mireds = minstr.empty() ? 153 : static_cast<uint16_t>(strtol(minstr.c_str(), nullptr, 10));
     uint16_t max_mireds = maxstr.empty() ? 500 : static_cast<uint16_t>(strtol(maxstr.c_str(), nullptr, 10));
     slot.assign(std::to_string(static_cast<int>(round(scale_value(

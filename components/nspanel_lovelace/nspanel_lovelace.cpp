@@ -846,12 +846,8 @@ void NSPanelLovelace::render_cover_detail_update_(StatefulPageItem *item) {
     entity->get_attribute(ha_attr_type::device_class),
     entity_cover_type::window);
 
-  auto &position_str = entity->
+  auto position_str = entity->
     get_attribute(ha_attr_type::current_position);
-  auto &supported_features_str = entity->
-    get_attribute(ha_attr_type::supported_features);
-  auto &tilt_position_str = entity->
-    get_attribute(ha_attr_type::current_tilt_position);
 
   uint8_t position = value_or_default(position_str, 0U);
   uint8_t tilt_position = value_or_default(entity->
@@ -1012,7 +1008,7 @@ void NSPanelLovelace::render_light_detail_update_(StatefulPageItem *item) {
   if (item == nullptr) return;
 
   auto entity = item->get_entity();
-  auto &supported_modes = entity->get_attribute(ha_attr_type::supported_color_modes);
+  auto supported_modes = entity->get_attribute(ha_attr_type::supported_color_modes);
   bool enable_color_wheel = entity->is_state(entity_state::on) &&
       (contains_value(supported_modes, ha_attr_color_mode::xy) || 
       contains_value(supported_modes, ha_attr_color_mode::hs) ||
@@ -1087,7 +1083,7 @@ void NSPanelLovelace::render_timer_detail_update_(StatefulPageItem *item) {
   }
   // active
   else {
-    auto &finishes_at = item->get_attribute(ha_attr_type::finishes_at);
+    auto finishes_at = item->get_attribute(ha_attr_type::finishes_at);
     if (!finishes_at.empty()) {
       tm t{};
       if (iso8601_to_tm(finishes_at.c_str(), t)) {
@@ -1196,7 +1192,7 @@ void NSPanelLovelace::render_climate_detail_update_(Entity *entity, const std::s
   };
 
   for (auto mt : mode_types) {
-    auto &supported_modes = entity->get_attribute(mt);
+    auto supported_modes = entity->get_attribute(mt);
     if (supported_modes.empty()) continue;
     
     std::string mode_res;
@@ -2008,8 +2004,8 @@ void NSPanelLovelace::process_button_press_(
     if (value.empty()) return;
     auto entity = this->get_entity_(entity_id);
     if (entity == nullptr) return;
-    auto &minstr = entity->get_attribute(ha_attr_type::min_mireds);
-    auto &maxstr = entity->get_attribute(ha_attr_type::max_mireds);
+    auto minstr = entity->get_attribute(ha_attr_type::min_mireds);
+    auto maxstr = entity->get_attribute(ha_attr_type::max_mireds);
     uint16_t min_mireds = minstr.empty() ? 153 : static_cast<uint16_t>(str_to_int(minstr));
     uint16_t max_mireds = maxstr.empty() ? 500 : static_cast<uint16_t>(str_to_int(maxstr));
     if (min_mireds >= max_mireds) {
@@ -2090,11 +2086,13 @@ void NSPanelLovelace::process_button_press_(
   } else if (button_type == button_type::modePresetModes) {
     auto entity = this->get_entity_(entity_id);
     if (entity == nullptr) return;
-    auto &modes_str = entity->get_attribute(ha_attr_type::preset_modes);
+    auto modes_str = entity->get_attribute(ha_attr_type::preset_modes);
     if (modes_str.empty()) return;
     std::vector<std::string> modes;
     split_str(',', modes_str, modes);
-    auto &selected_mode = modes.at(str_to_int(value));
+    uint8_t index = str_to_int(value);
+    if (modes.size() <= index) return;
+    auto &selected_mode = modes.at(index);
     this->call_ha_service_(
       entity_type,
       ha_action_type::set_preset_mode, 
@@ -2105,11 +2103,13 @@ void NSPanelLovelace::process_button_press_(
   } else if (button_type == button_type::modeSwingModes) {
     auto entity = this->get_entity_(entity_id);
     if (entity == nullptr) return;
-    auto &modes_str = entity->get_attribute(ha_attr_type::swing_modes);
+    auto modes_str = entity->get_attribute(ha_attr_type::swing_modes);
     if (modes_str.empty()) return;
     std::vector<std::string> modes;
     split_str(',', modes_str, modes);
-    auto &selected_mode = modes.at(str_to_int(value));
+    uint8_t index = str_to_int(value);
+    if (modes.size() <= index) return;
+    auto &selected_mode = modes.at(index);
     this->call_ha_service_(
       entity_type,
       ha_action_type::set_swing_mode, 
@@ -2120,11 +2120,13 @@ void NSPanelLovelace::process_button_press_(
   } else if (button_type == button_type::modeFanModes) {
     auto entity = this->get_entity_(entity_id);
     if (entity == nullptr) return;
-    auto &modes_str = entity->get_attribute(ha_attr_type::fan_modes);
+    auto modes_str = entity->get_attribute(ha_attr_type::fan_modes);
     if (modes_str.empty()) return;
     std::vector<std::string> modes;
     split_str(',', modes_str, modes);
-    auto &selected_mode = modes.at(str_to_int(value));
+    uint8_t index = str_to_int(value);
+    if (modes.size() <= index) return;
+    auto &selected_mode = modes.at(index);
     this->call_ha_service_(
       entity_type,
       ha_action_type::set_fan_mode, 
@@ -2154,7 +2156,7 @@ void NSPanelLovelace::process_button_press_(
   } else if (button_type == button_type::opnSensorNotify) {
     auto entity = this->get_entity_(entity_id);
     if (entity == nullptr) return;
-    auto &open_sensors_str = entity->get_attribute(ha_attr_type::open_sensors);
+    auto open_sensors_str = entity->get_attribute(ha_attr_type::open_sensors);
     if (open_sensors_str.empty()) return;
     std::string message;
     message.reserve(open_sensors_str.size());

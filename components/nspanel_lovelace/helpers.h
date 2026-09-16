@@ -238,7 +238,7 @@ inline std::string convert_python_arr_str(const std::string &str, const char del
       pos_start = str.find(quote, pos_end + 1);
     }
     if (pos_start == std::string::npos) {
-      if (tmp.back() == delimiter) tmp.pop_back();
+      if (!tmp.empty() && tmp.back() == delimiter) tmp.pop_back();
       break;
     }
     pos_end = str.find(quote, (pos_end > pos_start ? pos_end : pos_start) + 1);

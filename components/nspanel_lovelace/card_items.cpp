@@ -147,9 +147,9 @@ void EntitiesCardEntityItem::state_cover_fn(StatefulPageItem *me) {
     cover_icons,
     me_->get_attribute(ha_attr_type::device_class),
     entity_cover_type::window);
-  auto &position_str = me_->get_attribute(
+  auto position_str = me_->get_attribute(
     ha_attr_type::current_position);
-  auto &supported_features_str = me_->get_attribute(
+  auto supported_features_str = me_->get_attribute(
     ha_attr_type::supported_features);
 
   uint8_t position = 0;
