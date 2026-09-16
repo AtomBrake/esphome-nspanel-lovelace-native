@@ -461,7 +461,8 @@ void NSPanelLovelace::set_display_dim(uint8_t inactive, uint8_t active) {
     // brightness when active (when buttons pressed)
     .append(esphome::to_string(this->display_active_dim_)).append(1, SEPARATOR)
     // background colour when active (not screensaver background, defaults to ha-dark)
-    .append(esphome::to_string(6371));
+    .append(esphome::to_string(6371)).append(2, SEPARATOR)
+    .append(esphome::to_string(this->global_vertical_ui_ ? 1 : 0));
   
   this->send_buffered_command_();
 }
@@ -1466,31 +1467,26 @@ uint16_t NSPanelLovelace::recv_ret_string_(std::string &response, uint32_t timeo
 #endif
 }
 
-#ifdef USE_ARDUINO
-void NSPanelLovelace::set_reparse_mode_(bool active) {
-  // if (this->reparse_mode_ == active) return;
+// #ifdef USE_ARDUINO
+// void NSPanelLovelace::set_reparse_mode_(bool active) {
+//   // if (this->reparse_mode_ == active) return;
 
-  if (active) {
-    this->send_nextion_command_("recmod=1");
-  } else {
-    this->send_nextion_command_("DRAKJHSUYDGBNCJHGJKSHBDN");
-    this->send_nextion_command_("recmod=0");
-    this->send_nextion_command_("recmod=0");
-    this->send_nextion_command_("connect");
-  }
+//   if (active) {
+//     this->send_nextion_command_("recmod=1");
+//   } else {
+//     this->send_nextion_command_("DRAKJHSUYDGBNCJHGJKSHBDN");
+//     this->send_nextion_command_("recmod=0");
+//     this->send_nextion_command_("recmod=0");
+//     this->send_nextion_command_("connect");
+//   }
 
-  this->reparse_mode_ = active;
-}
-#endif // USE_ARDUINO
+//   this->reparse_mode_ = active;
+// }
+// #endif // USE_ARDUINO
 #endif // USE_NSPANEL_TFT_UPLOAD
 
 void NSPanelLovelace::init_display_(int baud_rate) {
-  // hopefully on NSPanel it should always be an ESP32ArduinoUARTComponent instance
-#ifdef USE_ESP_IDF
   auto *uart = reinterpret_cast<uart::IDFUARTComponent*>(this->parent_);
-#else
-  auto *uart = reinterpret_cast<uart::ESP32ArduinoUARTComponent*>(this->parent_);
-#endif
   uart->set_baud_rate(baud_rate);
   uart->setup();
 }
