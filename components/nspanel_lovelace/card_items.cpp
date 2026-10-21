@@ -248,8 +248,8 @@ void EntitiesCardEntityItem::state_weather_fn(StatefulPageItem *me) {
     ha_attr_type::temperature, "0");
   auto temperature_unit = me_->get_attribute(
     ha_attr_type::temperature_unit,
-    Configuration::get_temperature_unit_str());
-  
+    Configuration::get_temperature_unit_str().c_str());
+
   me_->value_.assign(temperature).append(temperature_unit);
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "defines.h"
+#include "esphome/core/defines.h"
 
 #include <array>
 #include <cassert>
